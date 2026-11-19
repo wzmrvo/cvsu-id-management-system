@@ -1,1 +1,1 @@
-@include('registrar.partials.ready', ['alertTitle' => 'Face-to-face photo completed', 'alertText' => 'A new compliant photo was captured at the ID desk and recorded in the printing software.'])
+@include('registrar.partials.ready', ['alertTitle' => 'Face-to-face photo completed', 'alertText' => 'A new compliant photo was captured at the ID desk and recorded in the printing software.', 'photoNote' => 'Modified at the desk (not stored here)'])

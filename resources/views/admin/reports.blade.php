@@ -1,14 +1,15 @@
 @php
     $filtered = request()->boolean('filtered');
     $exported = request()->boolean('exported');
-    $stats = $filtered ? [['Total applications', '42'], ['Approved', '0'], ['Scheduled', '42'], ['Claimed', '0']]
-                       : [['Total applications', '562'], ['Approved', '84'], ['Scheduled', '146'], ['Claimed', '104']];
-    $rows = $filtered ? [['Juan Miguel Santos', 'Nov 19, 2026', 'scheduled', 'AM-02', 'CVSU-261124-042'], ['Mark Angelo Reyes', 'Nov 17, 2026', 'scheduled', 'AM-02', 'CVSU-261124-043'], ['Alyssa Mae Bautista', 'Nov 17, 2026', 'scheduled', 'AM-02', 'CVSU-261124-044']]
-                      : [['Juan Miguel Santos', 'Nov 19, 2026', 'claimed', 'AM-02', 'CVSU-261124-042'], ['Alyssa Mae Bautista', 'Nov 18, 2026', 'pending', '—', '—'], ['Mark Angelo Reyes', 'Nov 17, 2026', 'approved', '—', '—'], ['Sophia Anne Mendoza', 'Nov 17, 2026', 'scheduled', 'PM-01', 'CVSU-261125-011'], ['Carlo Paolo Ramos', 'Nov 16, 2026', 'rejected', '—', '—']];
+    $stats = $filtered ? [['Total applications', '42'], ['Approved', '0'], ['Scheduled', '42'], ['Claimed', '0']] : [['Total applications', '562'], ['Approved', '84'], ['Scheduled', '146'], ['Claimed', '104']];
+    $rows = $filtered
+        ? [['Juan Miguel Santos', 'Nov 19, 2026', 'scheduled', 'AM-02', 'CVSU-261124-042'], ['Mark Angelo Reyes', 'Nov 17, 2026', 'scheduled', 'AM-02', 'CVSU-261124-043'], ['Alyssa Mae Bautista', 'Nov 17, 2026', 'scheduled', 'AM-02', 'CVSU-261124-044']]
+        : [['Juan Miguel Santos', 'Nov 19, 2026', 'claimed', 'AM-02', 'CVSU-261124-042'], ['Alyssa Mae Bautista', 'Nov 18, 2026', 'review', '—', '—'], ['Mark Angelo Reyes', 'Nov 17, 2026', 'approved', '—', '—'], ['Sophia Anne Mendoza', 'Nov 17, 2026', 'scheduled', 'PM-01', 'CVSU-261125-011'], ['Carlo Paolo Ramos', 'Nov 16, 2026', 'rejected', '—', '—']];
 @endphp
 <x-layouts.portal role="admin" active="reports" title="Reports & exports">
-    <x-ui.page-header eyebrow="System admin · Reports" title="From applications to insights." subtitle="Filter by status, date, and batch. Export what you need.">
-        <x-slot:actions><x-ui.button href="{{ url('/admin/reports?exported=1' . ($filtered ? '&filtered=1' : '')) }}">+ Export CSV</x-ui.button></x-slot:actions>
+<div x-data="{ loading: true }" x-init="setTimeout(() => loading = false, 500)">
+    <x-ui.page-header title="Reports and exports" subtitle="Filter by status, date, and batch. Export what you need." :crumbs="[['System administration', '/admin'], ['Reports & exports', null]]">
+        <x-slot:actions><x-ui.button href="{{ url('/admin/reports?exported=1' . ($filtered ? '&filtered=1' : '')) }}"><x-ui.icon name="download" /> Export CSV</x-ui.button></x-slot:actions>
     </x-ui.page-header>
 
     <x-ui.card class="mb-6">
@@ -25,21 +26,21 @@
     </div>
 
     <x-ui.card title="Application records" flush>
-        <x-ui.table :headers="['Student', 'Application date', 'Status', 'Batch', 'Reference']">
-            @foreach($rows as [$n, $d, $s, $b, $r])
-                <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 font-medium">{{ $n }}</td>
-                    <td class="whitespace-nowrap px-4 py-3 text-gray-600">{{ $d }}</td>
-                    <td class="px-4 py-3"><x-ui.badge :status="$s" /></td>
-                    <td class="px-4 py-3 text-gray-600">{{ $b }}</td>
-                    <td class="px-4 py-3 font-mono text-xs text-gray-600">{{ $r }}</td>
-                </tr>
-            @endforeach
-        </x-ui.table>
+        <div x-show="loading" class="p-5"><x-ui.skeleton :lines="4" /></div>
+        <div x-show="!loading" x-cloak>
+            @if(count($rows))
+            <x-ui.table :headers="['Student', 'Application date', 'Status', 'Batch', 'Reference']">
+                @foreach($rows as [$n, $d, $s, $b, $r])
+                    <tr class="hover:bg-gray-50"><td class="px-4 py-3 font-medium">{{ $n }}</td><td class="whitespace-nowrap px-4 py-3 text-gray-600">{{ $d }}</td><td class="px-4 py-3"><x-ui.badge :status="$s" /></td><td class="px-4 py-3 text-gray-600">{{ $b }}</td><td class="px-4 py-3 font-mono text-xs text-gray-600">{{ $r }}</td></tr>
+                @endforeach
+            </x-ui.table>
+            @else
+                <x-ui.empty-state title="No records match these filters" text="Try a different status, date range or batch." />
+            @endif
+        </div>
     </x-ui.card>
 
-    @if($exported)
-        <x-ui.alert class="mt-6" title="Export prepared · Prototype preview">{{ $filtered ? '42 records · Nov 1–30, 2026 · AM-02' : '562 records · Nov 1–30, 2026' }} · application_report.csv</x-ui.alert>
-    @endif
-    <p class="mt-6 text-xs text-gray-500">Reports contain personal information. Handle exports under the CvSU Data Privacy policy.</p>
+    @if($exported)<x-ui.toast-on-load :message="'Export prepared (prototype view): ' . ($filtered ? '42 records · AM-02' : '562 records') . ' · application_report.csv'" type="info" />@endif
+    <p class="mt-6 text-xs text-gray-500">Reports contain personal information. Handle exports under the CvSU data privacy policy.</p>
+</div>
 </x-layouts.portal>

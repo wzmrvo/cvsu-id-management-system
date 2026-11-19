@@ -1,44 +1,46 @@
 @php $saved = request('saved'); @endphp
 <x-layouts.portal role="admin" active="users" title="User accounts">
-    <x-ui.page-header eyebrow="System admin · User accounts" title="The right access for every role." subtitle="Manage accounts and keep student information accessible only to authorized users.">
-        <x-slot:actions><x-ui.button href="{{ url('/admin/users/new') }}">+ Add user account</x-ui.button></x-slot:actions>
+<div x-data="{ q: '', role: 'All roles' }">
+    <x-ui.page-header title="User accounts" subtitle="Manage accounts and keep student information available only to authorized users." :crumbs="[['System administration', '/admin'], ['User accounts', null]]">
+        <x-slot:actions><x-ui.button href="{{ url('/admin/users/new') }}"><x-ui.icon name="plus" /> Add user account</x-ui.button></x-slot:actions>
     </x-ui.page-header>
 
-    <x-ui.card flush class="mb-6">
+    @if($saved === 'updated')<x-ui.toast-on-load message="Account changes saved (prototype view · not stored)." type="info" />@endif
+    @if($saved === 'created')<x-ui.toast-on-load message="Account created (prototype view · not stored)." type="info" />@endif
+
+    <x-ui.card flush>
         <div class="flex flex-wrap items-center gap-3 border-b border-gray-100 p-4">
-            <input type="search" placeholder="Search by name, student number, or email" class="min-w-0 flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-cvsu-green focus:outline-none focus:ring-2 focus:ring-cvsu-green/25">
-            <span class="rounded-full bg-gray-100 px-3 py-1 text-xs text-gray-600">All roles</span>
+            <div class="relative min-w-0 flex-1"><x-ui.icon name="search" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input type="search" x-model="q" placeholder="Search by name, student number, or email" class="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:border-cvsu-green focus:outline-none focus:ring-2 focus:ring-cvsu-green/25"></div>
+            <select x-model="role" class="rounded-lg border border-gray-300 px-3 py-2 text-sm" aria-label="Role filter"><option>All roles</option><option>Student</option><option>Registrar / ID Personnel</option><option>System Administrator</option></select>
         </div>
-        <x-ui.table :headers="['Name / email', 'Role', 'Status', 'Last active', 'Action']">
+        <x-ui.table :headers="['Name / email', 'Role', 'Status', 'Last active', 'Actions']">
             @foreach([
                 ['Juan Miguel Santos', 'juanmiguel.santos@cvsu.edu.ph', 'Student', 'active', 'Today · 10:35 AM'],
                 ['Mario L. Reyes', 'mario.reyes@cvsu.edu.ph', 'Registrar / ID Personnel', 'active', 'Today · 10:20 AM'],
                 ['Andrea B. Cruz', 'andrea.cruz@cvsu.edu.ph', 'System Administrator', 'active', 'Today · 10:01 AM'],
                 ['Rafael M. Garcia', 'rafael.garcia@cvsu.edu.ph', 'Student', 'inactive', 'Nov 12 · 4:18 PM'],
                 ['Alyssa Mae Bautista', 'alyssa.bautista@cvsu.edu.ph', 'Student', 'active', 'Today · 9:15 AM'],
-            ] as [$n, $e, $role, $status, $last])
-                <tr class="hover:bg-gray-50">
+            ] as [$n, $e, $r, $st, $last])
+                <tr class="hover:bg-gray-50" x-show="(role === 'All roles' || role === '{{ $r }}') && (q === '' || '{{ strtolower($n . ' ' . $e) }}'.includes(q.toLowerCase()))">
                     <td class="px-4 py-3"><p class="font-medium">{{ $n }}</p><p class="text-xs text-gray-500">{{ $e }}</p></td>
-                    <td class="px-4 py-3 text-gray-600">{{ $role }}</td>
-                    <td class="px-4 py-3"><x-ui.badge :status="$status" /></td>
+                    <td class="px-4 py-3 text-gray-600">{{ $r }}</td>
+                    <td class="px-4 py-3"><x-ui.badge :status="$st" /></td>
                     <td class="whitespace-nowrap px-4 py-3 text-gray-600">{{ $last }}</td>
-                    <td class="px-4 py-3"><a href="{{ url('/admin/users/edit') }}" class="font-semibold text-cvsu-green hover:underline">Edit →</a></td>
+                    <td class="px-4 py-3"><div class="flex gap-2"><x-ui.button size="sm" variant="outline" href="{{ url('/admin/users/edit') }}">Edit</x-ui.button>
+                        <x-ui.button size="sm" variant="ghost" x-on:click="$dispatch('open-modal', 'deactivate')">{{ $st === 'active' ? 'Deactivate' : 'Activate' }}</x-ui.button></div></td>
                 </tr>
             @endforeach
         </x-ui.table>
+        <x-ui.pagination :from="1" :to="5" :total="1248" />
     </x-ui.card>
 
-    <h2 class="mb-3 font-semibold">Role permissions</h2>
-    <div class="mb-6 grid gap-4 md:grid-cols-3">
-        @foreach([
-            ['Student', 'Apply for an ID, track progress, and view their own claiming schedule.'],
-            ['Registrar / ID Personnel', 'Verify applications, assign batches, perform second verification, and record claims.'],
-            ['System Administrator', 'Manage accounts and roles, review the activity log, export reports.'],
-        ] as [$r, $d])
-            <x-ui.card accent><p class="font-semibold text-cvsu-green">{{ $r }}</p><p class="mt-1 text-sm text-gray-500">{{ $d }}</p></x-ui.card>
-        @endforeach
-    </div>
-
-    @if($saved === 'updated')<x-ui.alert>Account changes saved. The action has been recorded in the activity log.</x-ui.alert>@endif
-    @if($saved === 'created')<x-ui.alert>Account created. A setup invitation was sent to the new user's CvSU email.</x-ui.alert>@endif
+    <x-ui.modal name="deactivate" title="Change account status?">
+        <p class="text-sm text-gray-600">The user will lose or regain access to the system. This action is recorded in the activity log.</p>
+        <div class="mt-6 flex justify-end gap-2">
+            <x-ui.button variant="outline" x-on:click="$dispatch('close-modal')">Cancel</x-ui.button>
+            <x-ui.button x-on:click="$dispatch('close-modal'); $dispatch('toast', { message: 'Prototype only · status was not changed.', type: 'info' })">Confirm</x-ui.button>
+        </div>
+    </x-ui.modal>
+</div>
 </x-layouts.portal>

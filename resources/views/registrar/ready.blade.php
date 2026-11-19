@@ -1,1 +1,1 @@
-@include('registrar.partials.ready', ['alertTitle' => 'Valid photo · Face-to-face photo skipped', 'alertText' => 'Identity matches the submitted photo. The application is ready for the printing software.'])
+@include('registrar.partials.ready', ['alertTitle' => 'Valid photo · face-to-face photo skipped', 'alertText' => 'Identity matches the submitted photo. The record is ready for the printing software.', 'photoNote' => 'Submitted photo accepted'])
