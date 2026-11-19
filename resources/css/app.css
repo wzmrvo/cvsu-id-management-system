@@ -1,0 +1,20 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+/* CvSU theme: 60% white/light surfaces, 30% dark green, 10% gold */
+@theme {
+  --color-cvsu-green: #0B5D3B;
+  --color-cvsu-green-dark: #064428;
+  --color-cvsu-green-50: #E8F3EE;
+  --color-cvsu-gold: #C9A227;
+  --color-cvsu-gold-50: #FBF4DC;
+  --color-cvsu-bg: #F5F7F5;
+  --color-cvsu-ink: #111827;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+[x-cloak] { display: none !important; }
