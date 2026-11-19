@@ -87,10 +87,7 @@
                         </li>
                     @endforeach
                 </ul>
-                <p class="mt-6 flex items-center gap-2 text-xs text-white/80">
-                    <x-ui.icon name="pin" class="h-3.5 w-3.5 text-cvsu-gold" />
-                    Laya't Diwa · CvSU Main Campus, Indang, Cavite
-                </p>
+                
             </div>
         </div>
     </aside>

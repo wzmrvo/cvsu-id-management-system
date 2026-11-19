@@ -1,5 +1,5 @@
 <x-layouts.auth title="Sign in">
-    <h1 class="text-2xl font-semibold tracking-tight">Welcome back, Kabsu!</h1>
+    <h1 class="text-2xl font-semibold tracking-tight">Welcome back, Kabsuhenyo!</h1>
     <p class="mt-1 text-sm text-gray-500">Sign in to manage your student ID application.</p>
 
     <form class="mt-8 space-y-4" onsubmit="return false">
